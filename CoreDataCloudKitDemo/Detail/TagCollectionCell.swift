@@ -9,7 +9,36 @@ import UIKit
 
 class TagCollectionCell: UITableViewCell, UICollectionViewDelegate, UICollectionViewDataSource {
     @IBOutlet weak var collectionView: UICollectionView!
-    var post: Post?
+    private var _post: Post?
+    var post: Post? {
+        get {
+            return self._post
+        }
+        set {
+            self._post = newValue
+            sortTags()
+        }
+    }
+    var sortedTags: [Tag]?
+    
+    /**
+     Sort tags alphabetically.
+     */
+    fileprivate func sortTags() {
+        if let tags = self._post?.tags,
+            let tagsArray = tags.allObjects as? [Tag] {
+            self.sortedTags = tagsArray.sorted(by: { (tag1, tag2) -> Bool in
+                guard let name1 = tag1.name else {
+                    fatalError("###\(#function): Tag is missing a name! \(tag1)")
+                }
+                guard let name2 = tag2.name else {
+                    fatalError("###\(#function): Tag is missing a name! \(tag2)")
+                }
+                
+                return name1.compare(name2) == .orderedAscending
+            })
+        }
+    }
     
     /**
      The label font, used to calculate the tag text size.
@@ -42,7 +71,7 @@ class TagCollectionCell: UITableViewCell, UICollectionViewDelegate, UICollection
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "tagCVCell", for: indexPath) as? TagCVCell else {
             fatalError("###\(#function): Failed to dequeue TagCVCell! Check the cell reusable identifier in Main.storyboard.")
         }
-        guard let tag = post?.tags?.object(at: indexPath.row) as? Tag else { return cell }
+        guard let tag = sortedTags?[indexPath.row] else { return cell }
         
         cell.tagLabel.text = tag.name
         cell.tagLabel.textColor = tag.color as? UIColor
@@ -52,7 +81,8 @@ class TagCollectionCell: UITableViewCell, UICollectionViewDelegate, UICollection
     @objc(collectionView:layout:sizeForItemAtIndexPath:)
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
-        guard let tag = post?.tags?.object(at: indexPath.item) as? Tag else {
+        sortTags()
+        guard let tag = sortedTags?[indexPath.item] else {
             fatalError("###\(#function): Failed to retrieve a tag from post.tags at: \(indexPath.item)")
         }
         return TagLabel.sizeOf(text: tag.name!, font: tagLabelFont)

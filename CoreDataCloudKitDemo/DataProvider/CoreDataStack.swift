@@ -254,8 +254,11 @@ extension CoreDataStack {
             guard let posts = tag.posts else { return }
             
             for case let post as Post in posts {
-                if let index = post.tags?.index(of: tag) {
-                    post.replaceTags(at: index, with: winner)
+                if let mutableTags: NSMutableSet = post.tags?.mutableCopy() as? NSMutableSet {
+                    if mutableTags.contains(tag) {
+                        mutableTags.remove(tag)
+                        mutableTags.add(winner)
+                    }
                 }
             }
         }

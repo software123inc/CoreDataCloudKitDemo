@@ -75,9 +75,9 @@ class AttachmentProvider {
      
      Save to the store for synchronization only when the post is saved.
      */
-    func saveImageDataIfNeeded(for attachments: NSOrderedSet, taskContext: NSManagedObjectContext,
+    func saveImageDataIfNeeded(for attachments: NSSet, taskContext: NSManagedObjectContext,
                                completionHandler: (() -> Void)? = nil) {
-        guard let attachments = attachments.array as? [Attachment] else {
+        guard let attachments = attachments.allObjects as? [Attachment] else {
             completionHandler?()
             return
         }

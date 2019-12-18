@@ -43,12 +43,13 @@ class CoreDataStack {
         do {
             try container.viewContext.setQueryGenerationFrom(.current)
         } catch {
-            fatalError("###\(#function): Failed to pin viewContext to the current generation:\(error)")
+            fatalError("###\(#function): Failed to pin viewContext to the current generation token:\(error)")
         }
         
         // Observe Core Data remote change notifications.
         NotificationCenter.default.addObserver(
-            self, selector: #selector(type(of: self).storeRemoteChange(_:)),
+            self,
+            selector: #selector(type(of: self).storeRemoteChange(_:)),
             name: .NSPersistentStoreRemoteChange, object: container)
         
         return container
